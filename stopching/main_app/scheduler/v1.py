@@ -1,1 +1,1 @@
-# Aqui ira la instancia del bot automatico que iniciara una tarea cada cierto tiempo
+# Aqui ira la instancia del bot automatico que iniciara una tarea cada cierto lapso de tiempo
