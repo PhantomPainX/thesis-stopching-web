@@ -61,4 +61,4 @@ class NewsImage(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.new.title + " - " + self.image
+        return self.new.title

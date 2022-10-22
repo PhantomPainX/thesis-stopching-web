@@ -57,3 +57,25 @@ class CommentSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at'
         ]
+
+class NewsImageSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = NewsImage
+        fields = [
+            'id',
+            'new',
+            'image',
+            'created_at',
+            'updated_at'
+        ]
+
+class NewsCategorySerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = NewsCategory
+        fields = [
+            'id',
+            'name',
+            'description'
+        ]

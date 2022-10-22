@@ -25,7 +25,18 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [permissions.DjangoModelPermissionsOrAnonReadOnly]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    # filterset_fields = ['estreno', 'idioma', 'generos', 'tipo', 'estado']
     search_fields = ['content']
     ordering_fields = ['created_at', 'updated_at']
     queryset = Comment.objects.all()
+
+class NewsImageViewSet(viewsets.ModelViewSet):
+    serializer_class = NewsImageSerializer
+    permission_classes = [permissions.DjangoModelPermissionsOrAnonReadOnly]
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['created_at', 'updated_at']
+    queryset = NewsImage.objects.all()
+
+class NewsCategoryViewSet(viewsets.ModelViewSet):
+    serializer_class = NewsCategorySerializer
+    permission_classes = [permissions.DjangoModelPermissionsOrAnonReadOnly]
+    queryset = NewsCategory.objects.all()
