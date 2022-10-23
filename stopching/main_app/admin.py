@@ -6,7 +6,6 @@ class NewAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'title',
-        'content',
         'created_at',
         'updated_at',
         'image',
@@ -16,6 +15,7 @@ class NewAdmin(admin.ModelAdmin):
         'user_classification'
     )
     search_fields = ('title',)
+    list_filter = ('category',)
 
 @admin.register(NewsCategory)
 class NewsCategoryAdmin(admin.ModelAdmin):
@@ -37,7 +37,12 @@ class CommentAdmin(admin.ModelAdmin):
     list_display = ('id', 'new', 'user', 'content', 'in_response_to', 'created_at', 'updated_at')
     search_fields = ('content',)
 
+@admin.register(NewSection)
+class NewSectionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'new', 'title', 'created_at', 'updated_at')
+    search_fields = ('content',)
+
 @admin.register(NewsImage)
 class NewsImageAdmin(admin.ModelAdmin):
-    list_display = ('id', 'new', 'image', 'created_at', 'updated_at')
-    search_fields = ('content',)
+    list_display = ('id', 'new', 'image', 'remote_image', 'note', 'created_at', 'updated_at')
+    search_fields = ('note',)

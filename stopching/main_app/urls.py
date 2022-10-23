@@ -13,6 +13,7 @@ router.register(r'newscategories', api_views.NewsCategoryViewSet, basename='news
 
 urlpatterns = [
     path('', home, name='home'),
+    path('scrape/', scrape, name='scrape'),
 
     # API URLS
     path('api/v1/', include(router.urls)),

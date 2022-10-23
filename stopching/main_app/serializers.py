@@ -36,6 +36,7 @@ class NewSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
             'image',
+            'remote_image',
             'category',
             'detection_accuracy',
             'ai_classification',
@@ -66,6 +67,7 @@ class NewsImageSerializer(serializers.ModelSerializer):
             'id',
             'new',
             'image',
+            'remote_image',
             'created_at',
             'updated_at'
         ]

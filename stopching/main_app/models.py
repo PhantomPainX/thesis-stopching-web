@@ -1,7 +1,6 @@
-from datetime import datetime
 from django.db import models
-import datetime
-
+from django.utils.translation import gettext_lazy as _
+from main_app.webp import WEBPField
 from django.contrib.auth.models import User
 
 class AINewsClassification(models.Model):
@@ -29,14 +28,31 @@ class NewsCategory(models.Model):
     def __str__(self):
         return self.name
 
+def new_webp(instance, filename):
+    #Revisar cantidad de archivos en la carpeta portadas
+    from django.conf import settings
+    import os
+    import glob
+    cant_archivos = len(glob.glob(os.path.join(settings.MEDIA_ROOT, 'images/news/front/*')))
+    #cambiar el nombre de la imagen
+    nombre = str(cant_archivos+1)
+    filename = "images/news/front/{}.webp".format(nombre)
+    return filename
+
 class New(models.Model):
     title = models.CharField(max_length=512)
-    content = models.TextField()
+    author = models.CharField(max_length=256, null=True, blank=True)
+    new_date = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    image = models.ImageField(upload_to='images/news/front/' + str(datetime.datetime.now().date()) + "/", blank=True, null=True)
+    image = WEBPField(
+        verbose_name=_('Image'),
+        upload_to=new_webp,
+        default='images/news/front/default.webp',
+    )
+    remote_image = models.URLField(null=True, blank=True)
     category = models.ForeignKey(NewsCategory, null=False, default=1, on_delete=models.SET_DEFAULT)
-    detection_accuracy = models.FloatField()
+    detection_accuracy = models.FloatField(null=True, blank=True)
     ai_classification = models.ForeignKey(AINewsClassification, null=True, blank=True, on_delete=models.SET_NULL)
     user_classification = models.ForeignKey(UserNewsClassification, null=True, blank=True, on_delete=models.SET_NULL)
 
@@ -54,9 +70,39 @@ class Comment(models.Model):
     def __str__(self):
         return self.new.title + " - " + self.user.username
 
-class NewsImage(models.Model):
+class NewSection(models.Model):
     new = models.ForeignKey(New, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='images/news/body/' + str(datetime.datetime.now().date()) + "/", blank=True, null=True)
+    title = models.CharField(max_length=512)
+    content = models.TextField()
+    position = models.IntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.new.title + " - " + self.title
+
+def new_body_webp(instance, filename):
+    #Revisar cantidad de archivos en la carpeta portadas
+    from django.conf import settings
+    import os
+    import glob
+    cant_archivos = len(glob.glob(os.path.join(settings.MEDIA_ROOT, 'images/news/body/*')))
+    #cambiar el nombre de la imagen
+    nombre = str(cant_archivos+1)
+    filename = "images/news/body/{}.webp".format(nombre)
+    return filename
+
+class NewsImage(models.Model):
+
+    new = models.ForeignKey(New, on_delete=models.CASCADE)
+    image = WEBPField(
+        verbose_name=_('Image'),
+        upload_to=new_body_webp,
+        default='images/news/body/default.webp',
+    )
+    position = models.IntegerField(default=1)
+    remote_image = models.URLField(null=True, blank=True)
+    note = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
