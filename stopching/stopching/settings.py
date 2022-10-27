@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'django_filters',
+    'django_extensions',
     'main_app'
 ]
 
@@ -157,3 +158,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'django.contrib.auth.backends.RemoteUserBackend'
 ]
+
+# AUTOMATIC SCRAPERS
+
+AUTOMATIC_NEWS_UPDATE = False

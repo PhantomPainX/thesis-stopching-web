@@ -11,8 +11,7 @@ class NewAdmin(admin.ModelAdmin):
         'image',
         'category',
         'detection_accuracy',
-        'ai_classification',
-        'user_classification'
+        'ai_classification'
     )
     search_fields = ('title',)
     list_filter = ('category',)

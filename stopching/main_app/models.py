@@ -54,10 +54,19 @@ class New(models.Model):
     category = models.ForeignKey(NewsCategory, null=False, default=1, on_delete=models.SET_DEFAULT)
     detection_accuracy = models.FloatField(null=True, blank=True)
     ai_classification = models.ForeignKey(AINewsClassification, null=True, blank=True, on_delete=models.SET_NULL)
-    user_classification = models.ForeignKey(UserNewsClassification, null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.title
+
+class UsersClassification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    new = models.ForeignKey(New, on_delete=models.CASCADE)
+    classification = models.ForeignKey(UserNewsClassification, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.new.title + " - " + self.classification.name
 
 class Comment(models.Model):
     new = models.ForeignKey(New, on_delete=models.CASCADE)
@@ -108,3 +117,18 @@ class NewsImage(models.Model):
 
     def __str__(self):
         return self.new.title
+
+class UserExtra(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    prefered_categories = models.ManyToManyField(NewsCategory, through='UserCategory', blank=True)
+
+    def __str__(self):
+        return self.user.username
+
+class UserCategory(models.Model):
+    user_extra = models.ForeignKey(UserExtra, on_delete=models.CASCADE)
+    category = models.ForeignKey(NewsCategory, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username + " - " + self.category.name
