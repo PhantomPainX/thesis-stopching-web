@@ -118,8 +118,24 @@ class NewsImage(models.Model):
     def __str__(self):
         return self.new.title
 
+def user_profile_webp(instance, filename):
+    #Revisar cantidad de archivos en la carpeta portadas
+    from django.conf import settings
+    import os
+    import glob
+    cant_archivos = len(glob.glob(os.path.join(settings.MEDIA_ROOT, 'images/users/profile/*')))
+    #cambiar el nombre de la imagen
+    nombre = str(cant_archivos+1)
+    filename = "images/users/profile/{}.webp".format(nombre)
+    return filename
+
 class UserExtra(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    image = WEBPField(
+        verbose_name=_('Image'),
+        upload_to=user_profile_webp,
+        default='images/users/profile/default.webp',
+    )
     prefered_categories = models.ManyToManyField(NewsCategory, through='UserCategory', blank=True)
 
     def __str__(self):
@@ -131,4 +147,4 @@ class UserCategory(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.user.username + " - " + self.category.name
+        return self.user_extra.user.username + " - " + self.category.name
