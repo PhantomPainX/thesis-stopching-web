@@ -5,6 +5,7 @@ from main_app.models import *
 from django.conf import settings
 from main_app.scheduler.categories import Categories
 from main_app.scheduler.scrapers.main import Scraper
+from main_app.scheduler.AI.ai_detection import AIDetection
 
 # Aqui se definen las categorias que aceptaran los scrapers
 categories = Categories()
@@ -46,6 +47,7 @@ class BBCScraper(Scraper):
     def __init__(self):
         self.front_images_folder = settings.MEDIA_ROOT + '/images/news/front/'
         self.body_images_folder = settings.MEDIA_ROOT + '/images/news/body/'
+        self.ai_detection = AIDetection()
 
     # Obtiene las noticias y las guarda en la base de datos
     # Noticias, secciones de las noticias e imagenes
@@ -151,6 +153,9 @@ class BBCScraper(Scraper):
             section_number = 0
             # Aqui iran los parrafos de la seccion separados en \n\n
             paragraphs = ""
+
+            text_for_ai = ""
+
             for section in new_sections:
 
                 section_title = ""
@@ -183,8 +188,24 @@ class BBCScraper(Scraper):
                 if section.find('p'):
                     if paragraphs == "":
                         paragraphs = section.find('p').text
+                        text_for_ai += section.find('p').text
                     else:
                         paragraphs += "\n\n"+section.find('p').text
+                        text_for_ai += " "+section.find('p').text
+
+            # Detección de AI
+            ai_result = self.ai_detection.LRModel_Predict(text_for_ai)
+            
+            if ai_result['prediction_label'] == 1:
+                ai_classification = AINewsClassification.objects.get_or_create(name="Falso")[0]
+            else:
+                ai_classification = AINewsClassification.objects.get_or_create(name="Real")[0]
+
+            New.objects.filter(id=new_object_id).update(
+                ai_classification=ai_classification,
+                detection_accuracy=ai_result['probability']
+            )
+
 
             # Si es la ultima seccion, se actualiza la seccion actual con los parrafos al salir del ciclo
             if section_id != -1:
@@ -216,7 +237,6 @@ class BBCScraper(Scraper):
                             remote_image=body_img,
                             note=note
                         )
-
             time.sleep(1)
 
         return downloaded_news
