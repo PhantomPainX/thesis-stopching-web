@@ -14,7 +14,7 @@ class NewAdmin(admin.ModelAdmin):
         'ai_classification'
     )
     search_fields = ('title',)
-    list_filter = ('category',)
+    list_filter = ('category','ai_classification',)
 
 @admin.register(NewsCategory)
 class NewsCategoryAdmin(admin.ModelAdmin):
@@ -45,3 +45,14 @@ class NewSectionAdmin(admin.ModelAdmin):
 class NewsImageAdmin(admin.ModelAdmin):
     list_display = ('id', 'new', 'image', 'remote_image', 'note', 'created_at', 'updated_at')
     search_fields = ('note',)
+
+@admin.register(UserExtra)
+class UserExtraAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'g_prefered_categories')
+
+    def g_prefered_categories(self, obj):
+        return ",\n".join([p.category.name for p in UserCategory.objects.all()])
+
+@admin.register(UserCategory)
+class UserCategoryAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user_extra', 'category', 'created_at')
