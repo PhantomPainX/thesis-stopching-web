@@ -311,3 +311,6 @@ def predict_article(request):
             'error': 'Invalid AI Model.',
             'ai_models': ['LRModel']
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+#FALTA USER NEWS CLASSIFICATION
