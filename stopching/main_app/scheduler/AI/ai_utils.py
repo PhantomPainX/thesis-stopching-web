@@ -8,8 +8,8 @@ from nltk.tokenize import word_tokenize
 class AIUtils:
     
     def stemming(self, content):
-        # nltk.download('stopwords')
-        # nltk.download('punkt')
+        #nltk.download('stopwords')
+        #nltk.download('punkt')
         stop_words = set(stopwords.words('spanish'))
         port_stem = PorterStemmer()
 

@@ -14,7 +14,7 @@ def scrapingTasks():
 
 
 def startAutomaticTasks():
-    #scrapingTasks()
+    scrapingTasks()
     print("Starting Automatic Tasks...")
     scheduler = BackgroundScheduler(timezone='America/Argentina/Buenos_Aires')
     scheduler.add_job(scrapingTasks, 'interval', hours=5, id="scrapingTasks", replace_existing=True)

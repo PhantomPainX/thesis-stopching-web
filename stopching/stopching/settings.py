@@ -88,7 +88,7 @@ DATABASES = {
         'NAME': 'stopching',
         'USER': 'root',
         'PASSWORD': '12345',
-        'HOST': 'localhost',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }
@@ -165,4 +165,4 @@ AUTHENTICATION_BACKENDS = [
 
 # AUTOMATIC SCRAPERS
 
-AUTOMATIC_NEWS_UPDATE = False
+AUTOMATIC_NEWS_UPDATE = True
