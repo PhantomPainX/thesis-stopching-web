@@ -14,6 +14,8 @@ router.register(r'comments', api_views.CommentViewSet, basename='comments')
 router.register(r'news-images', api_views.NewsImageViewSet, basename='news-images')
 router.register(r'news-categories', api_views.NewsCategoryViewSet, basename='news-categories')
 router.register(r'user-categories', api_views.UserCategoriesViewSet, basename='user-categories')
+router.register(r'ai-classifications', api_views.AINewsClassificationViewSet, basename='ai-classifications')
+router.register(r'replies', api_views.CommentRepliesViewSet, basename='replies')
 
 urlpatterns = [
     path('', home, name='home'),

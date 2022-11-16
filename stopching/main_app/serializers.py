@@ -1,16 +1,19 @@
 from django.contrib.auth.models import User, Group
 from .models import *
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 
 class UserSerializer(serializers.ModelSerializer):
-
-    # extra = serializers.SerializerMethodField(read_only=True)
-    # def get_extra(self, obj):
-    #     return UserExtra.objects.filter(user=obj.id).values()
 
     user_extra = serializers.SerializerMethodField(read_only=True)
     def get_user_extra(self, obj):
         return UserExtra.objects.filter(user=obj.id).values()
+
+    token = serializers.SerializerMethodField(read_only=True)
+    def get_token(self, obj):
+        token, created = Token.objects.get_or_create(user=obj)
+        return token.key
+        
 
     prefered_categories = serializers.SerializerMethodField(read_only=True)
     def get_prefered_categories(self, obj):
@@ -18,7 +21,22 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id','url', 'username', 'email', 'first_name', 'last_name','groups', 'user_extra','prefered_categories',]
+        fields = [
+            'id',
+            'username',
+            'email',
+            'token',
+            'first_name',
+            'last_name',
+            'is_staff',
+            'is_superuser',
+            'is_active',
+            'date_joined',
+            'last_login',
+            'groups',
+            'user_extra',
+            'prefered_categories'
+        ]
 
 class UserExtraSerializer(serializers.ModelSerializer):
 
@@ -88,6 +106,10 @@ class NewSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+
+    replies = serializers.SerializerMethodField(read_only=True)
+    def get_replies(self, obj):
+        return CommentReplies.objects.filter(comment=obj.id).count()
     
     class Meta:
         model = Comment
@@ -96,10 +118,66 @@ class CommentSerializer(serializers.ModelSerializer):
             'new',
             'user',
             'content',
-            'in_response_to',
+            'replies',
             'created_at',
             'updated_at'
         ]
+
+    def create(self, validated_data):
+        new = validated_data['new']
+        user = self.context['request'].user
+
+        comment = Comment.objects.filter(
+            new=new,
+            user=user,
+            content=validated_data['content']
+        )
+        if comment.exists():
+            raise serializers.ValidationError({'error': 'Ya has comentado esto'})
+        else:
+            # clean_comment = palabrota.censor(validated_data['comment'])
+
+            comment = Comment.objects.create(
+                new=new,
+                user=user,
+                content=validated_data['content']
+            )
+            return comment
+
+class CommentRepliesSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    
+    class Meta:
+        model = CommentReplies
+        fields = [
+            'id',
+            'comment',
+            'user',
+            'content',
+            'created_at',
+            'updated_at'
+        ]
+
+    def create(self, validated_data):
+        comment = validated_data['comment']
+        user = self.context['request'].user
+
+        reply = CommentReplies.objects.filter(
+            comment=comment,
+            user=user,
+            content=validated_data['content']
+        )
+        if reply.exists():
+            raise serializers.ValidationError({'error': 'Ya has replicado esto'})
+        else:
+            # clean_comment = palabrota.censor(validated_data['comment'])
+
+            reply = CommentReplies.objects.create(
+                comment=comment,
+                user=user,
+                content=validated_data['content']
+            )
+            return reply
 
 class NewsImageSerializer(serializers.ModelSerializer):
     
@@ -135,4 +213,16 @@ class UserCategorySerializer(serializers.ModelSerializer):
             'user_extra',
             'category',
             'created_at'
+        ]
+
+class AINewsClassificationSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = AINewsClassification
+        fields = [
+            'id',
+            'name',
+            'description',
+            'created_at',
+            'updated_at'
         ]

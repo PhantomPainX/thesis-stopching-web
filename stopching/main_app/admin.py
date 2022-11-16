@@ -33,7 +33,12 @@ class UserNewsClassificationAdmin(admin.ModelAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'new', 'user', 'content', 'in_response_to', 'created_at', 'updated_at')
+    list_display = ('id', 'new', 'user', 'content', 'created_at', 'updated_at')
+    search_fields = ('content',)
+
+@admin.register(CommentReplies)
+class CommentRepliesAdmin(admin.ModelAdmin):
+    list_display = ('id', 'comment', 'id', 'content', 'created_at', 'updated_at')
     search_fields = ('content',)
 
 @admin.register(NewSection)

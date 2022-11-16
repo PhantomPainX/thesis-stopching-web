@@ -144,23 +144,60 @@ class NewViewSet(viewsets.ModelViewSet):
     ordering_fields = ['created_at', 'updated_at']
     queryset = New.objects.all()
 
+    def get_queryset(self):
+        #si por parametro, se envia random, se ordena aleatoriamente
+        if self.request.query_params.get('random', None):
+            return New.objects.order_by('?')
+        else:
+            return New.objects.all()
+
 # COMMENT API VIEWS
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
+    filterset_fields = ['new', 'user']
+    http_method_names = ['get', 'post', 'delete', 'options']
     search_fields = ['content']
     ordering_fields = ['created_at', 'updated_at']
     queryset = Comment.objects.all()
 
-    def create(self, request):
-        user = self.request.user
-        serializer = CommentSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save(user=user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def destroy(self, request, pk=None):
+        comment = Comment.objects.get(id=pk)
+
+        if request.user.is_staff:
+            comment.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        elif comment.user == request.user:
+            comment.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+class CommentRepliesViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentRepliesSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
+    filterset_fields = ['comment', 'user']
+    http_method_names = ['get', 'post', 'delete', 'options']
+    search_fields = ['content']
+    ordering_fields = ['created_at', 'updated_at']
+    queryset = CommentReplies.objects.all()
+
+    def destroy(self, request, pk=None):
+        reply = CommentReplies.objects.get(id=pk)
+
+        if request.user.is_staff:
+            reply.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        elif reply.user == request.user:
+            reply.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
 # NEWS IMAGE API VIEWS
 
@@ -176,6 +213,7 @@ class NewsImageViewSet(viewsets.ModelViewSet):
 class NewsCategoryViewSet(viewsets.ModelViewSet):
     serializer_class = NewsCategorySerializer
     permission_classes = [permissions.DjangoModelPermissionsOrAnonReadOnly]
+    http_method_names = ['get', 'options']
     queryset = NewsCategory.objects.all()
 
 # USERCATEGORY API VIEWS
@@ -216,6 +254,13 @@ class UserCategoriesDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserCategorySerializer
     permission_classes = [permissions.IsAuthenticated]
 
+
+class AINewsClassificationViewSet(viewsets.ModelViewSet):
+    serializer_class = AINewsClassificationSerializer
+    permission_classes = [permissions.DjangoModelPermissionsOrAnonReadOnly]
+    http_method_names = ['get', 'options']
+    queryset = AINewsClassification.objects.all()
+
 # CUSTOM API VIEWS
 
 @api_view(['GET'])
@@ -223,8 +268,8 @@ class UserCategoriesDetailView(generics.RetrieveUpdateDestroyAPIView):
 def signin(request):
 
     try:
-        username = request.data['username']
-        password = request.data['password']
+        username = request.GET['username']
+        password = request.GET['password']
     except KeyError:
         return Response({'error': 'Missing username or password.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -239,21 +284,23 @@ def signin(request):
     if user is not None:
         if user.is_active:
             login(request, user)
-            token, created = Token.objects.get_or_create(user=user)
+            # token, created = Token.objects.get_or_create(user=user)
 
-            user_data = {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'token': token.key,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'is_staff': user.is_staff,
-                'is_superuser': user.is_superuser,
-                'is_active': user.is_active,
-                'date_joined': user.date_joined,
-                'last_login': user.last_login
-            }
+            # user_data = {
+            #     'id': user.id,
+            #     'username': user.username,
+            #     'email': user.email,
+            #     'token': token.key,
+            #     'first_name': user.first_name,
+            #     'last_name': user.last_name,
+            #     'is_staff': user.is_staff,
+            #     'is_superuser': user.is_superuser,
+            #     'is_active': user.is_active,
+            #     'date_joined': user.date_joined,
+            #     'last_login': user.last_login
+            # }
+
+            user_data = UserSerializer(user).data
 
             return Response({'user' : user_data}, status=status.HTTP_200_OK)
         else:

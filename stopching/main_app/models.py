@@ -71,13 +71,22 @@ class UsersClassification(models.Model):
 class Comment(models.Model):
     new = models.ForeignKey(New, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    in_response_to = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.new.title + " - " + self.user.username
+
+class CommentReplies(models.Model):
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.comment.new.title + " - " + self.user.username
 
 class NewSection(models.Model):
     new = models.ForeignKey(New, on_delete=models.CASCADE)
